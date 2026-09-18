@@ -1,49 +1,57 @@
-
-
-
-
 import streamlit as st
-from PIL import Image
+import tensorflow as tf
+from PIL import Image, ImageOps
 import numpy as np
-import cv2
-from ultralytics import YOLO
 
-# ضبط إعدادات الصفحة
-st.set_page_config(page_title="Face Mask Detection", page_icon="😷")
+# Page configuration
+st.set_page_config(
+    page_title="Cats vs Dogs Classifier 🐱🐶",
+    page_icon="🐾",
+    layout="centered"
+)
 
-st.title("😷 Face Mask Detection System")
-st.write("Upload an image to detect whether people are wearing masks or not.")
+# App Title & Description
+st.title("🐱🐶 Image Classification: Cat or Dog?")
+st.write("Upload an image of a cat or a dog, and the model will predict its class instantly.")
 
-# تحميل النموذج (قم بتغيير 'best.pt' إلى مسار نموذج YOLO الخاص بك)
+# Load model with caching for speed optimization
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")
+    model = tf.keras.models.load_model('best_cats_dogs_model.keras')
+    return model
 
-try:
+with st.spinner('Loading model...'):
     model = load_model()
-except Exception as e:
-    st.error("لم يتم العثور على ملف النموذج، يرجى التأكد من وجود ملف النموذج (مثل best.pt) في المجلد.")
 
-# أداة رفع الصور
+# Image upload widget
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # قراءة الصورة بواسطة PIL
+    # Display the uploaded image
     image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
     
-    # عرض الصورة الأصلية باستخدام use_container_width المصححة
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.write("Analyzing...")
     
-    if st.button("Detect Mask"):
-        with st.spinner("Processing image..."):
-            # تحويل الصورة إلى مصفوفة Numpy لـ OpenCV / YOLO
-            img_array = np.array(image.convert("RGB"))
-            
-            # تشغيل نموذج YOLO للتعرف على الكمامات
-            results = model(img_array)
-            
-            # رسم النتائج على الصورة
-            res_plotted = results[0].plot()
-            
-            # عرض الصورة بعد الاكتشاف
-            st.image(res_plotted, caption="Detection Result", use_container_width=True)
+    # Preprocess image matching model requirements (224x224 & 1/255 scaling)
+    size = (224, 224)
+    image_resized = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
+    img_array = np.asarray(image_resized)
+    
+    # Ensure RGB channels (handles RGBA PNG uploads)
+    if img_array.shape[-1] == 4:
+        img_array = img_array[:, :, :3]
+        
+    img_reshape = img_array / 255.0  # Rescale
+    img_reshape = np.expand_dims(img_reshape, axis=0)  # Add batch dimension
+    
+    # Prediction
+    prediction = model.predict(img_reshape)[0][0]
+    
+    # Display result based on Sigmoid output
+    if prediction > 0.5:
+        score = prediction * 100
+        st.success(f"🐶 **Prediction: Dog** (Confidence: {score:.2f}%)")
+    else:
+        score = (1 - prediction) * 100
+        st.success(f"🐱 **Prediction: Cat** (Confidence: {score:.2f}%)")
