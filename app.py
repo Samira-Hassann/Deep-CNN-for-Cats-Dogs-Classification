@@ -72,7 +72,7 @@ st.markdown('<h1 class="title-text">🐱🐶 Cats vs Dogs Classifier</h1>', unsa
 st.markdown('<p class="subtitle-text">Upload an image for instant deep learning classification</p>', unsafe_allow_html=True)
 
 # 5. Load Model with Caching & Verification
-MODEL_NAME = 'best_cats_dogs_model.keras'
+MODEL_NAME = 'best_cats_dogs_model (2).keras'
 
 @st.cache_resource
 def load_model():
