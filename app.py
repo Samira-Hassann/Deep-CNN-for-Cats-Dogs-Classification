@@ -17,7 +17,7 @@ st.write("Upload an image of a cat or a dog, and the model will predict its clas
 # Load model with caching for speed optimization
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model('best_cats_dogs_model.keras')
+    model = tf.keras.models.load_model('best_cats_dogs_model (2).keras')
     return model
 
 with st.spinner('Loading model...'):
