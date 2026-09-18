@@ -12,7 +12,7 @@ Key Features:
 🔗 Links & Resources:
 🌐 Live App: https://cats-dogs-classification.streamlit.app/  
 📓 Kaggle Notebook: https://www.kaggle.com/code/samoura/deep-cnn-model-for-cats-dogs-classification  
-💻 GitHub Repo: https://github.com/samoura/deep-cnn-for-cats-dogs-classification
+💻 GitHub Repo: https://github.com/Samira-Hassann/Deep-CNN-for-Cats-Dogs-Classification
 
 Feel free to check it out and share your feedback! 👇
 
