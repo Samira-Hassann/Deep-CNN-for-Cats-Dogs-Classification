@@ -1,9 +1,10 @@
+import os
 import streamlit as st
 import tensorflow as tf
 from PIL import Image, ImageOps
 import numpy as np
 
-# 1. إعداد الصفحة وتصميم الهيكل الرئيسي
+# 1. Page Configuration
 st.set_page_config(
     page_title="AI Vision | Cats & Dogs Classifier",
     page_icon="🐾",
@@ -11,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. إضافة لمسات وتنسيقات CSS مخصصة لإعطاء مظهر احترافي
+# 2. Custom CSS for Modern UI
 st.markdown("""
     <style>
     .main {
@@ -48,57 +49,61 @@ st.markdown("""
         color: #475569;
     }
     </style>
-""", unsafe_unsafe_html=True)
+""", unsafe_allow_html=True)
 
-# 3. الشريط الجانبي (Sidebar)
+# 3. Sidebar
 with st.sidebar:
     st.image("https://img.icons8.com/isometric/512/dog--v1.png", width=100)
     st.title("🐾 AI Pet Vision")
-    st.write("تطبيق ذكاء اصطناعي لتصنيف الصور باستخدام شبكات التلافيف العميقة (CNN).")
+    st.write("An AI-powered web app to classify images using Deep Convolutional Neural Networks (CNN).")
     st.divider()
     
-    st.subheader("💡 تعليمات الاستخدام")
+    st.subheader("💡 Instructions")
     st.markdown("""
-    1. ارفع صورة لقطة أو كلب بصيغة `JPG` أو `PNG`.
-    2. انتظر ثانية لمعالجة الصورة تلقائياً.
-    3. استعرض النتيجة ونسبة ثقة النموذج.
+    1. Upload an image of a cat or a dog (`JPG` or `PNG`).
+    2. Wait a moment for automatic processing.
+    3. View the prediction result and model confidence score.
     """)
     st.divider()
     st.caption("Powered by TensorFlow & Streamlit")
 
-# 4. العنوان الرئيسي للموقع
+# 4. Main Header
 st.markdown('<h1 class="title-text">🐱🐶 Cats vs Dogs Classifier</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle-text">رفع صورة للتعرف التلقائي عليها بواسطة نموذج الذكاء الاصطناعي</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle-text">Upload an image for instant deep learning classification</p>', unsafe_allow_html=True)
 
-# 5. تحميل النموذج بالتخزين المؤقت
+# 5. Load Model with Caching & Verification
+MODEL_NAME = 'best_cats_dogs_model.keras'
+
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model('best_cats_dogs_model (2).keras')
+    if not os.path.exists(MODEL_NAME):
+        st.error(f"❌ Model file `{MODEL_NAME}` not found. Make sure it is uploaded in the root directory on GitHub.")
+        st.stop()
+    return tf.keras.models.load_model(MODEL_NAME, safe_mode=False)
 
-with st.spinner('جاري تحميل النموذج...'):
+with st.spinner('Loading model...'):
     model = load_model()
 
-# 6. تقسيم الواجهة إلى أعمدة (Columns) لتنظيم العرض
+# 6. Layout Columns
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.subheader("📤 رفع الصورة")
+    st.subheader("📤 Upload Image")
     uploaded_file = st.file_uploader(
-        "اختر صورة لرفعها...", 
+        "Choose an image...", 
         type=["jpg", "jpeg", "png"],
-        help="تدعم الصيغ: JPG, JPEG, PNG"
+        help="Supported formats: JPG, JPEG, PNG"
     )
     
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption="الصورة المرفوعة", use_container_width=True)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
 
 with col2:
-    st.subheader("📊 نتيجة التحليل")
+    st.subheader("📊 Analysis Result")
     
     if uploaded_file is not None:
-        with st.spinner('جاري تحليل الصورة...'):
-            # معالجة الصورة
+        with st.spinner('Analyzing image...'):
             image_rgb = image.convert('RGB')
             size = (224, 224)
             image_resized = ImageOps.fit(image_rgb, size, Image.Resampling.LANCZOS)
@@ -106,17 +111,15 @@ with col2:
             img_array = np.asarray(image_resized) / 255.0
             img_reshape = np.expand_dims(img_array, axis=0)
             
-            # التنبؤ
             prediction = model.predict(img_reshape)[0][0]
             
-            # عرض النتائج بشكل أنيق
             if prediction > 0.5:
                 score = prediction * 100
                 st.balloons()
                 st.markdown(f"""
                 <div class="prediction-card" style="border-left: 6px solid #22c55e;">
-                    <h2 style="color: #15803d; margin:0;">🐶 التنبؤ: كلب (Dog)</h2>
-                    <p class="confidence-text" style="margin-top:10px;">نسبة الثقة: <b>{score:.2f}%</b></p>
+                    <h2 style="color: #15803d; margin:0;">🐶 Prediction: Dog</h2>
+                    <p class="confidence-text" style="margin-top:10px;">Confidence Score: <b>{score:.2f}%</b></p>
                 </div>
                 """, unsafe_allow_html=True)
                 st.progress(int(score))
@@ -125,10 +128,10 @@ with col2:
                 st.snow()
                 st.markdown(f"""
                 <div class="prediction-card" style="border-left: 6px solid #06b6d4;">
-                    <h2 style="color: #0e7490; margin:0;">🐱 التنبؤ: قطة (Cat)</h2>
-                    <p class="confidence-text" style="margin-top:10px;">نسبة الثقة: <b>{score:.2f}%</b></p>
+                    <h2 style="color: #0e7490; margin:0;">🐱 Prediction: Cat</h2>
+                    <p class="confidence-text" style="margin-top:10px;">Confidence Score: <b>{score:.2f}%</b></p>
                 </div>
                 """, unsafe_allow_html=True)
                 st.progress(int(score))
     else:
-        st.info("👈 قم برفع صورة من القائمة على اليسار لبدء التحليل.")
+        st.info("👈 Please upload an image from the left side to start analysis.")
