@@ -4,10 +4,9 @@ An interactive web application powered by Deep Learning (CNN) to classify images
 
 ---
 
-## 🔗 Notebook Reference
-The complete model training, Exploratory Data Analysis (EDA), and data preprocessing pipeline can be found in the Kaggle Notebook:  
-👉 [Deep CNN Model for Cats & Dogs Classification 🐱🐶](https://www.kaggle.com/code/samoura/deep-cnn-model-for-cats-dogs-classification)
-
+## 🔗 Quick Links
+* 🌐 **Live Web App:** [Cats vs Dogs Classifier App](https://cats-dogs-classification.streamlit.app/)
+* 📓 **Kaggle Notebook:** [Deep CNN Model for Cats & Dogs Classification 🐱🐶](https://www.kaggle.com/code/samoura/deep-cnn-model-for-cats-dogs-classification)
 ---
 
 ## 📁 Repository Structure
