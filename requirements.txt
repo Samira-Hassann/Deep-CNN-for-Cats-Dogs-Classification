@@ -2,4 +2,3 @@ streamlit
 tensorflow-cpu
 pillow
 numpy
-python-3.11
